@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 
 	"gopkg.in/alecthomas/kingpin.v2"
-	//"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -26,7 +26,7 @@ var (
 	password  = app.Flag("password", "Password to use for digest authentication (will read from TTY if not given).").Short('p').String()
 	recursive = app.Flag("recursive", "Get nodes recursively.").Short('r').Bool()
 	rootpath  = app.Arg("path", "Root path (default: \"/\").").Default("/").String()
-	types     = app.Flag("type", "import/export file type, JSON or YAML ").Short('t').Strings()
+	filetype  = app.Flag("type", "import/export file type, JSON or YAML ").Short('t').String()
 	file      = app.Flag("file", "file name for import or export").Short('f').Strings()
 	imp       = app.Flag("import", "import key/value pairs from file to zookeeper").Short('i').Bool()
 	exp       = app.Flag("export", "export key/value pairs to file from zookeeper").Short('e').Bool()
@@ -84,18 +84,20 @@ func main() {
 
 	if (*imp) && (*exp) {
 		*imp = false
-		verboseLog("both import and export options are choosed, set option to export -i:%s", *user);
+		verboseLog("both import and export options are choosed, set option to export -e:%s", *filetype);
 	}
 
 	if *imp {
-
+		doImport()
 	} else {
 		doExport()
 	}
 }
 
 func doImport(){
-	//yaml.Unmarshal(os.Args[1:])
+	// TODO: check file type in arguments
+	// TOOD: read key/value file 
+	// import yaml.Unmarshal(os.Args[1:])
 }
 
 func doExport(){
@@ -103,9 +105,18 @@ func doExport(){
 	rootNode := getZkNode(*rootpath, path.Base(*rootpath))
 	//	saveJSON(rootNode, "test.json")
 
-	bin, _ := json.MarshalIndent(&rootNode, "", "  ")
+	if *filetype == "" {
+		//*types =  "JSON"
+	} 
+
+	if *filetype=="JSON" {
+		bin, _ := json.MarshalIndent(&rootNode, "", "  ")
+		fmt.Println(string(bin))	
+	} else {
+		bin, _ := yaml.Marshal(&rootNode)
+		fmt.Println(string(bin))	
+	}
 	
-	fmt.Println(string(bin))	
 }
 
 func verboseLog(s string, p string) {
@@ -140,6 +151,10 @@ func check(e error) {
 	if e != nil {
 		log.Fatal(e)
 	}
+}
+
+func printYAML(data interface{}, file string){
+	println();
 }
 
 func saveJSON(data interface{}, file string) {
