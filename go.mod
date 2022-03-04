@@ -8,4 +8,5 @@ require (
 	github.com/go-zookeeper/zk v1.0.2
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
+	gopkg.in/yaml.v2 v2.4.0
 )

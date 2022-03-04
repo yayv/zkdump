@@ -13,18 +13,23 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 
 	"gopkg.in/alecthomas/kingpin.v2"
+	//"gopkg.in/yaml.v2"
 )
 
 var (
 	err       error
 	c         = &zk.Conn{}
-	app       = kingpin.New("zkdump", "A command-line utility to dump Zookeeper data.").Author("Dennis Waterham <dennis.waterham@oracle.com>").Version("1.0")
+	app       = kingpin.New("zkdump", "A command-line utility to import/export Zookeeper data.").Author("Dennis Waterham <dennis.waterham@oracle.com>").Version("1.0")
 	servers   = app.Flag("server", "Host name and port to connect to (host:port)").Required().Short('s').Strings()
 	verbose   = app.Flag("verbose", "Print verbose.").Short('v').Bool()
 	user      = app.Flag("user", "Username to use for digest authentication.").Short('u').String()
 	password  = app.Flag("password", "Password to use for digest authentication (will read from TTY if not given).").Short('p').String()
 	recursive = app.Flag("recursive", "Get nodes recursively.").Short('r').Bool()
 	rootpath  = app.Arg("path", "Root path (default: \"/\").").Default("/").String()
+	types     = app.Flag("type", "import/export file type, JSON or YAML ").Short('t').Strings()
+	file      = app.Flag("file", "file name for import or export").Short('f').Strings()
+	imp       = app.Flag("import", "import key/value pairs from file to zookeeper").Short('i').Bool()
+	exp       = app.Flag("export", "export key/value pairs to file from zookeeper").Short('e').Bool()
 )
 
 type zkNode struct {
@@ -77,12 +82,30 @@ func main() {
 		log.Fatalf("ERROR: Path %s doesn't exist", *rootpath)
 	}
 
+	if (*imp) && (*exp) {
+		*imp = false
+		verboseLog("both import and export options are choosed, set option to export -i:%s", *user);
+	}
+
+	if *imp {
+
+	} else {
+		doExport()
+	}
+}
+
+func doImport(){
+	//yaml.Unmarshal(os.Args[1:])
+}
+
+func doExport(){
 	// Get Root node
 	rootNode := getZkNode(*rootpath, path.Base(*rootpath))
 	//	saveJSON(rootNode, "test.json")
 
-	bin, err := json.MarshalIndent(&rootNode, "", "  ")
-	fmt.Println(string(bin))
+	bin, _ := json.MarshalIndent(&rootNode, "", "  ")
+	
+	fmt.Println(string(bin))	
 }
 
 func verboseLog(s string, p string) {
