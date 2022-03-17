@@ -1,0 +1,5 @@
+package FileModels
+
+func GetJson(){
+
+}
