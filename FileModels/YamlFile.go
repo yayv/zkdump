@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (pf *PkvFile)PrintYaml(){
+func (pf *PkvFile)PrintYAML(root string){
 	var result []string
 	
 	var printLine string
@@ -13,7 +13,15 @@ func (pf *PkvFile)PrintYaml(){
 	for _,v := range pf.Lines {
 		printLine = ""
 
-		result = strings.Split(v.Path, "/")
+		// TODO: remove root from Path
+		var path string
+		if strings.HasPrefix(v.Path, root) {
+			path = v.Path[len(root):];
+		} else {
+			path = v.Path
+		}
+
+		result = strings.Split(path, "/")
 
 		printLine = strings.Repeat("\t",len(result))
 		printLine += result[len(result)-1]+":"

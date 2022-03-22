@@ -8,15 +8,17 @@ import (
 	"path"
 	"syscall"
 	"time"
+	"FileModels"
 
 	"github.com/go-zookeeper/zk"
 	"golang.org/x/crypto/ssh/terminal"
 
 	"gopkg.in/alecthomas/kingpin.v2"
-	"gopkg.in/yaml.v2"
+//	"gopkg.in/yaml.v2"
 )
 
 var (
+	pkv       FileModels.PkvFile
 	err       error
 	c         = &zk.Conn{}
 	app       = kingpin.New("zkdump", "A command-line utility to import/export Zookeeper data.").Author("Dennis Waterham <dennis.waterham@oracle.com>").Version("1.0")
@@ -111,10 +113,14 @@ func doExport(){
 
 	if *filetype=="JSON" {
 		bin, _ := json.MarshalIndent(&rootNode, "", "  ")
-		fmt.Println(string(bin))	
+		fmt.Println(bin)
+		pkv.PrintJSON()
+	} else if *filetype=="PKV" {
+		//bin, _ := yaml.Marshal(&rootNode)
+		//fmt.Println(string(bin))	
+		pkv.PrintAll()
 	} else {
-		bin, _ := yaml.Marshal(&rootNode)
-		fmt.Println(string(bin))	
+		pkv.PrintYAML(*rootpath)
 	}
 	
 }
@@ -130,6 +136,12 @@ func getZkNode(path, name string) *zkNode {
 	check(err)
 
 	zkNode := &zkNode{Path: path, Name: name, Data: string(bin)}
+	if bin == nil {
+		pkv.Append(path,name,string(bin),"path")	
+	} else {
+		pkv.Append(path,name,string(bin),"value")	
+	}
+	
 
 	if st.NumChildren > 0 {
 		zkNode.getChildren()
@@ -140,6 +152,7 @@ func getZkNode(path, name string) *zkNode {
 
 func readPassword() string {
 	fmt.Print("Enter Password: ")
+
 	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
 	check(err)
 
@@ -154,7 +167,7 @@ func check(e error) {
 }
 
 func printYAML(data interface{}, file string){
-	println();
+	
 }
 
 func saveJSON(data interface{}, file string) {
