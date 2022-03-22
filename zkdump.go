@@ -136,15 +136,12 @@ func getZkNode(path, name string) *zkNode {
 	check(err)
 
 	zkNode := &zkNode{Path: path, Name: name, Data: string(bin)}
-	if bin == nil {
-		pkv.Append(path,name,string(bin),"path")	
-	} else {
-		pkv.Append(path,name,string(bin),"value")	
-	}
-	
 
 	if st.NumChildren > 0 {
+		pkv.Append(path,name,string(bin),"path")
 		zkNode.getChildren()
+	} else {
+		pkv.Append(path,name,string(bin),"value")	
 	}
 
 	return zkNode
