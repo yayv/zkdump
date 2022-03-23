@@ -8,7 +8,7 @@ import (
 	"path"
 	"syscall"
 	"time"
-	"FileModels"
+	"zkdump/FileModels"
 
 	"github.com/go-zookeeper/zk"
 	"golang.org/x/crypto/ssh/terminal"
