@@ -29,7 +29,7 @@ var (
 	recursive = app.Flag("recursive", "Get nodes recursively.").Short('r').Bool()
 	rootpath  = app.Arg("path", "Root path (default: \"/\").").Default("/").String()
 	filetype  = app.Flag("type", "import/export file type, JSON or YAML ").Short('t').String()
-	file      = app.Flag("file", "file name for import or export").Short('f').Strings()
+	file      = app.Flag("file", "file name for import or export").Short('f').String()
 	imp       = app.Flag("import", "import key/value pairs from file to zookeeper").Short('i').Bool()
 	exp       = app.Flag("export", "export key/value pairs to file from zookeeper").Short('e').Bool()
 )
@@ -98,8 +98,22 @@ func main() {
 
 func doImport(){
 	// TODO: check file type in arguments
-	// TOOD: read key/value file 
-	// import yaml.Unmarshal(os.Args[1:])
+	if *file=="" {
+		fmt.Println("No filename set. Please use -f to set filename.")
+	}
+
+	fmt.Println("filetype:",*filetype)
+    // import yaml.Unmarshal(os.Args[1:])
+
+    switch *filetype {
+    	case "PKV":
+    		pkv.LoadFromPKV(*file)
+    	case "JSON":
+			pkv.LoadFromJSON(*file)
+		default:
+     		pkv.LoadFromYAML(*file)
+    }
+
 }
 
 func doExport(){
