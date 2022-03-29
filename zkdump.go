@@ -96,15 +96,15 @@ func main() {
 	}
 }
 
+
 func doImport(){
 	// TODO: check file type in arguments
 	if *file=="" {
 		fmt.Println("No filename set. Please use -f to set filename.")
 	}
 
-	fmt.Println("filetype:",*filetype)
     // import yaml.Unmarshal(os.Args[1:])
-
+    pkv.Rootpath = *rootpath
     switch *filetype {
     	case "PKV":
     		pkv.LoadFromPKV(*file)
@@ -112,8 +112,9 @@ func doImport(){
 			pkv.LoadFromJSON(*file)
 		default:
      		pkv.LoadFromYAML(*file)
-    }
+    }    
 
+    pkv.SyncToZk(c)
 }
 
 func doExport(){

@@ -29,6 +29,7 @@ func (a PkvLines) Less(i, j int) bool { return a[i].Path < a[j].Path }
 
 type PkvFile struct {
 	Lines PkvLines
+	Rootpath string
 }
 
 func (pf *PkvFile)Append(path, key, value,valueType string){
