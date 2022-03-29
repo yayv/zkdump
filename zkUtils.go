@@ -8,7 +8,7 @@ import (
 	"path"
 	"syscall"
 	"time"
-	"zkdump/FileModels"
+	"zkUtils/FileModels"
 
 	"github.com/go-zookeeper/zk"
 	"golang.org/x/crypto/ssh/terminal"
@@ -22,6 +22,7 @@ var (
 	err       error
 	c         = &zk.Conn{}
 	app       = kingpin.New("zkdump", "A command-line utility to import/export Zookeeper data.").Author("Dennis Waterham <dennis.waterham@oracle.com>").Version("1.0")
+	command   = app.Arg("command", "Root path (default: \"/\").").Default("/").String()
 	servers   = app.Flag("server", "Host name and port to connect to (host:port)").Required().Short('s').Strings()
 	verbose   = app.Flag("verbose", "Print verbose.").Short('v').Bool()
 	user      = app.Flag("user", "Username to use for digest authentication.").Short('u').String()
