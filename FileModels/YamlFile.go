@@ -42,8 +42,9 @@ func (pf *PkvFile)PrintYAML(root string){
 func printPath(path []string) string{
 	var fullpath string
 	for _,v := range(path) {
-		fullpath += "/"+v
+		fmt.Printf("%s ", v)
 	}
+	fmt.Println()
 
 	return fullpath
 }
@@ -56,12 +57,12 @@ func (pf *PkvFile)LoadFromYAML(filename string){
     }
     defer file.Close()
 
-    //indent  := 0
     scanner := bufio.NewScanner(file)
     var pkv,key,value string
     var path []string
 
     rule,_  := regexp.Compile(`([ ]*)([a-zA-Z0-9-_]*):(.*)`)
+    indent  := 0
     rule.Longest()
     // optionally, resize scanner's capacity for lines over 64K, see next example
     i:=0
@@ -69,18 +70,26 @@ func (pf *PkvFile)LoadFromYAML(filename string){
     	i+=1
     	pkv = scanner.Text()
 
+    	fmt.Println(path)
     	all := rule.FindStringSubmatch(pkv)
     	if len(all)>0 {
-	    	//indent 	= len(all[1])/2
 	    	key 	= all[2]
 	    	value 	= all[3]
+	    	indent 	= len(all[1])/2
 
-    		path = append(path, key)
+	    	fmt.Println(indent, len(path))
+	    	if indent>0 && indent==len(path)-1 || indent<len(path) {
+				path = path[:indent-1]
+	    	} 
+			path = append(path, key)
 
-	        fmt.Println(printPath(path), key, ":",value)
-    	} else {
-    		fmt.Printf("!%s!",pkv)
+	        //fmt.Println(indent, printPath(path))
+	        fmt.Println(pkv)
+	        fmt.Println(key, ":",value)
     	}
+    	fmt.Println(path)
+
+    	fmt.Println()
     }
 
     if err := scanner.Err(); err != nil {
