@@ -82,3 +82,6 @@ func (pf *PkvFile)PrintAll(){
 	}
 }
 
+func (pf *PkvFile)LoadFromPKV(filename string){
+	fmt.Println(filename)
+}
