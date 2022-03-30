@@ -21,18 +21,17 @@ var (
 	pkv       FileModels.PkvFile
 	err       error
 	c         = &zk.Conn{}
-	app       = kingpin.New("zkdump", "A command-line utility to import/export Zookeeper data.").Author("Dennis Waterham <dennis.waterham@oracle.com>").Version("1.0")
-	command   = app.Arg("command", "Root path (default: \"/\").").Default("/").String()
-	servers   = app.Flag("server", "Host name and port to connect to (host:port)").Required().Short('s').Strings()
-	verbose   = app.Flag("verbose", "Print verbose.").Short('v').Bool()
-	user      = app.Flag("user", "Username to use for digest authentication.").Short('u').String()
-	password  = app.Flag("password", "Password to use for digest authentication (will read from TTY if not given).").Short('p').String()
-	recursive = app.Flag("recursive", "Get nodes recursively.").Short('r').Bool()
+	app       = kingpin.New("zkUtils", "A command-line utility to clean/import/export Zookeeper data.").Author("Dennis Waterham <dennis.waterham@oracle.com>").Version("1.0")
+	command   = app.Arg("command", "utils command, export is default").Default("export").String()
 	rootpath  = app.Arg("path", "Root path (default: \"/\").").Default("/").String()
+	user      = app.Flag("username", "Username to use for digest authentication.").Short('u').String()
+	password  = app.Flag("password", "Password to use for digest authentication (will read from TTY if not given).").Short('p').String()
+
+	servers   = app.Flag("server", "Host name and port to connect to (host:port)").Default("127.0.0.1:2181").Short('s').Strings()
+	verbose   = app.Flag("verbose", "Print verbose.").Short('v').Bool()
+	recursive = app.Flag("recursive", "Get nodes recursively.").Short('r').Bool()
 	filetype  = app.Flag("type", "import/export file type, JSON or YAML ").Short('t').String()
-	file      = app.Flag("file", "file name for import or export").Short('f').String()
-	imp       = app.Flag("import", "import key/value pairs from file to zookeeper").Short('i').Bool()
-	exp       = app.Flag("export", "export key/value pairs to file from zookeeper").Short('e').Bool()
+	file      = app.Flag("file", "file name for import or export").Short('f').Default("os.stdin").String()
 )
 
 type zkNode struct {
@@ -85,18 +84,22 @@ func main() {
 		log.Fatalf("ERROR: Path %s doesn't exist", *rootpath)
 	}
 
-	if (*imp) && (*exp) {
-		*imp = false
-		verboseLog("both import and export options are choosed, set option to export -e:%s", *filetype);
-	}
-
-	if *imp {
-		doImport()
-	} else {
-		doExport()
+	switch *command {
+		case "import":
+			doImport()
+		case "clean":
+			doClean()
+		case "export":
+			doExport()
+		default:
+			fmt.Println("<command> is needed. try option --hellp to see more info.");
 	}
 }
 
+func doClean(){
+	fmt.Println("Clean Zookeeper Tree")
+	cleanZkTree(*rootpath)	
+}
 
 func doImport(){
 	// TODO: check file type in arguments
@@ -145,6 +148,13 @@ func verboseLog(s string, p string) {
 	if *verbose {
 		log.Printf(s+"\n", p)
 	}
+}
+
+func cleanZkTree(path string){
+	bin, st, err := c.Get(path)
+	fmt.Println(bin,st.Version,err)
+	stat := c.Delete(path,st.Version)	
+	fmt.Println(stat)
 }
 
 func getZkNode(path, name string) *zkNode {
